@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Display JSON Data</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>JSON Data Display</h1>
+    <table id="data-table"></table>
+
+    <script>
+        function fetchJSON(dataUrl) {
+            return fetch(dataUrl)
+                .then(response => response.json())
+                .then(data => data.products);
+        }
+
+        function dataStorage(data) {
+            const dataframe = Object.keys(data).map(key => data[key]);
+            
+            dataframe.forEach(item => {
+                item.price = parseFloat(item.price);
+                item.popularity = parseFloat(item.popularity);
+            });
+
+            dataframe.sort((a, b) => b.popularity - a.popularity);
+            
+            return dataframe;
+        }
+
+        function displayTable(dataframe) {
+            const table = document.getElementById('data-table');
+
+            const headers = Object.keys(dataframe[0]);
+            const headerRow = table.insertRow();
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+
+            dataframe.forEach(item => {
+                const row = table.insertRow();
+                Object.values(item).forEach(value => {
+                    const cell = row.insertCell();
+                    cell.textContent = value;
+                });
+            });
+        }
+
+        const url = 'https://s3.amazonaws.com/open-to-cors/assignment.json';
+
+        fetchJSON(url)
+            .then(data => {
+                const dataframe = dataStorage(data);
+                displayTable(dataframe);
+            });
+    </script>
+</body>
+</html>
